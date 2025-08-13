@@ -116,12 +116,11 @@ All analysis codes are implemented in R and stored in the `codes/processing` dir
    - `Figure 2. Microbial diversity. Accounting for STH status.` (_baseline vs follow-up groups_).
 3. Dimensionality reduction
    - `Figure 2. PCoA based on Bray-Curtis distance. Baseline and follow-up groups.`
-   - `Supplementary Figure 5. PCoA based on Bray-Curtis distance. Prior antihelminthic treatment.`
 4. Genera-vanishment analysis
    - `Figure 3. ASV vanishment analysis`
 5. Beta-diversity
    - `Figure 4. ALDEx2 analysis. Wilcoxon test.`
-   - `Supplementary Figure 4. ALDEx2 analysis. Welch test.`
-   - `Supplementary Figure 5. DESeq2 analysis. `
+   - `Supplementary Figure 4. DESeq2 analysis. `
+   - `Supplementary Figure 5. ALDEx2 analysis. Welch test.`
 6. Prediction of previous antihelminthic treatments using microbial balance score
    - `Figure 5. Prediction of previous antihelminthic treatments.`
