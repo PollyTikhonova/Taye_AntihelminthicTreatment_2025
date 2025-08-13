@@ -1,6 +1,6 @@
 # Analysis of antihelminthic treatment dataset
 
- [![License CCO v.1](https://img.shields.io/github/license/PollyTikhonova/Taye_AntihelminthicTreatment_2025
+ [![License CCO v.1](https://img.shields.io/github/license/PollyTikhonova/Taye_AntihelminthicTreatment_2025?v=1
 )](https://github.com/PollyTikhonova/Taye_AntihelminthicTreatment_2025/blob/main/LICENSE)
  doi shield
 
