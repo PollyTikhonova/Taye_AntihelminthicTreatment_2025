@@ -1,0 +1,161 @@
+---
+title: An R Markdown document converted from "github/Taye_AntihelminthicTreatment_2025/code/analysis/Figure
+  2. Microbial diversity.ipynb"
+output: html_document
+---
+
+### Loading Libraries
+
+```{r}
+# load libararies
+library(vegan)
+library(phyloseq)
+library(ranacapa)
+library(ape)
+library(ggplot2)
+library(ggpubr)
+library(plotly)
+library(reshape2)
+```
+
+```{r}
+# create directories to save files
+dir.create(file.path('../../results/figures'), showWarnings = FALSE)
+dir.create(file.path('../../results/figures', 'figure2'), showWarnings = FALSE)
+```
+
+# Alpha Diversity & Rarefraction
+
+### Loading Data
+
+```{r}
+# load phyloseq file
+ps <- readRDS('../../data/phyloseq/nohost_asv/phyloseq.rds')
+ps
+```
+
+### Alpha-diversity
+Steps: 
+1. Rarefy to the depth 
+2. Compute alpha-diversity & assess significance using Wilcoxon signed rank test
+
+#### 1. Rarefy
+
+```{r}
+set.seed(295) # setting seed to replicate the randomized rarefraction
+# rarefy phyloseq object
+ps_rarefied <- rarefy_even_depth(ps, 1e+05)
+ps_rarefied
+```
+
+```{r}
+# look at the rarefraction curve
+p <- ggrare(ps_rarefied, step = 1000, color = 'collection_timepoint', se = FALSE)
+```
+
+#### 2. Compute alpha-diversity
+Tutorial credit: https://rpubs.com/lconteville/713954
+
+```{r}
+# set plot parameters
+comparisons <- list(c("baseline", "follow-up"))
+symnum.args = list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, 1), symbols = c("****", "***", "**", "*", "ns"))
+```
+
+```{r}
+# find ids of people who were dewormed
+onlydewormed_ids <- sample_data(ps_rarefied)[sample_data(ps_rarefied)[['collection_timepoint']] == 'follow-up',]$host_subject_id
+# select only samples from subjects participated in the follow-up study
+ps_rarefied_onlywithdewormed <- subset_samples(ps_rarefied, host_subject_id %in% onlydewormed_ids)
+length(onlydewormed_ids)*2 == nsamples(ps_rarefied_onlywithdewormed)
+```
+
+```{r}
+# compute alpha diversity
+alpha_div <- data.frame(microbiome::alpha(ps_rarefied_onlywithdewormed, 
+                                          index=c('observed', 'shannon', 'inverse_simpson')))
+colnames(alpha_div) <- c('Observed', 'Shannon', 'Simpson')
+alpha_div['ID'] <- row.names(alpha_div)
+# reshape the table for plotting with ggplot
+alpha_div <- melt(alpha_div)
+colnames(alpha_div) <- c('ID', 'metric', 'value')
+alpha_div['collection_timepoint'] <- sample_data(ps_rarefied_onlywithdewormed)[alpha_div$ID, 'collection_timepoint']
+alpha_div['collection_timepoint'] <- factor(alpha_div$collection_timepoint, levels=c('baseline', 'follow-up'))
+levels(alpha_div$collection_timepoint) <- c("Baseline", "1-year\nfollow-up")
+alpha_div['host_subject_id'] <- sample_data(ps_rarefied_onlywithdewormed)[alpha_div$ID, 'host_subject_id']
+```
+
+```{r}
+# set a figure size
+width = 10
+height = 7
+options(repr.plot.width=width, repr.plot.height=height)
+comparisons <- list(c("Baseline", "1-year\nfollow-up"))
+
+# plot a figure
+p <- ggplot(alpha_div, aes(x=collection_timepoint, y=value, color = collection_timepoint, fill=collection_timepoint)) + 
+# plot error bar first
+      stat_boxplot(geom = "errorbar", width = 0.15, lwd=1.3) +
+# lay boxplot on top
+      geom_boxplot(alpha=0.2, lwd=1.3, width=0.5) +
+# lines connecting pairs of samples
+      geom_line(aes(x = collection_timepoint, group = host_subject_id), color = "gray", size = 0.5,) +
+# overlay alpha-diversity values as dots
+      geom_jitter(size=4, width=0.1, shape=21, color='black')  + 
+# add p-value statistics
+      stat_compare_means(  
+                         id = "host_subject_id", comparisons = comparisons, 
+                         method = "wilcox.test", paired=TRUE, 
+                         label = "p.signif", 
+                         symnum.args = symnum.args, size = 7) +
+# build a separate plot for each alpha-diversity metric
+      facet_wrap(~metric, scales = "free_y") + 
+# change default colors
+      scale_fill_manual(values = c('#878787', '#b9a04f')) + 
+      scale_colour_manual(values = c('#878787', '#b9a04f')) +
+# add titles
+      labs(x = "", y = "Diversity value", title = "Microbial diversity",
+           subtitle = "Baseline & 1-year follow-up") +
+# expand y limits to fit the p-value statistics into a plot
+      scale_y_continuous(expand = expansion(mult = 0.1)) +
+# custom plot design
+      theme_minimal() +
+      theme(axis.text=element_text(size=15),
+            axis.title=element_text(size=25, face="bold"), 
+            plot.title=element_text(size=25, face="bold"),
+            plot.subtitle=element_text(size=22, face="plain"),
+            strip.text = element_text(size = 25, hjust=0, color='#656565'), 
+            axis.text.x.bottom = element_text(size=17, angle=0, face='plain', hjust=0.5, vjust=0.5),
+            axis.title.y = element_text(color='#656565', face='plain'),
+            text = element_text(size = 25, face="bold"), 
+            axis.line.y = element_line(color = "darkgrey", linewidth = 0.5), 
+            axis.line.x.bottom = element_line(color = "darkgrey", linewidth = 0.5), 
+            panel.border     = element_rect(fill = NA, colour = "grey70", linewidth = rel(1)),
+            panel.spacing.x = unit(2, "lines"),
+            legend.position="none") 
+
+# save a plot with a scale of k
+k = 0.3
+ggsave(file=file.path('../../results/figures', 'figure2', 'before_after.alpha_diversity.svg'), plot=p, 
+       width=width*k, height=height*k, scaling = k)
+# show a plot
+print(p)
+```
+
+```{r}
+# perform wilcox.test manually to retrieve p-valeus
+test_res <- data.frame()
+for (metric in c('Observed', 'Shannon', 'Simpson')) {
+    observed <- alpha_div[alpha_div$metric == metric, ]
+    
+    stat.test <- compare_means(
+      value ~ collection_timepoint, data = observed,
+      method = "wilcox.test", paired=TRUE,
+      id = 'host_subject_id',
+    )
+    stat.test['metric'] = metric
+    test_res <- rbind(test_res, stat.test)
+}
+test_res
+```
+

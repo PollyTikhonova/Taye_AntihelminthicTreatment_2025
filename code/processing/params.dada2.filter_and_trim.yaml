@@ -1,0 +1,11 @@
+truncLenF: 0  # default
+truncLenR: 0  # default
+trimLeftF: 12 # based on MultiQC results
+trimLeftR: 12 # based on MultiQC results
+maxEEF: Inf   # default
+maxEER: Inf   # default
+truncQ: 2     # default
+maxN: 0       # default
+rm.phix: TRUE # default
+maxLen: Inf   # default
+minLen: 20    # default

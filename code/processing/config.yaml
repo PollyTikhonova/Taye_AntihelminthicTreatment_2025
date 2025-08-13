@@ -1,0 +1,23 @@
+# FastQC/MultiQC parameters
+qc: 
+  strand: ['R1']
+  conda: 'conda_env.qc.yaml'
+
+# filter and trim parameters
+filter_trim: 
+  script_dir: '../scripts/filter_and_trim'
+  dada2_params: '../params.dada2.filter_and_trim.yaml'
+  conda: 'conda_env.dada2.yaml'
+
+# dada2 parameters
+dada2:
+  metadata: '../../../data/metadata.tsv'
+  script_dir: '../scripts/dada2'
+  pool: FALSE
+  db_silva: "../../../data/database/silva_nr_v132_train_set.fa.gz"
+  db_species: "../../../data/database/silva_species_assignment_v132.fa.gz"
+  conda: 'conda_env.dada2.yaml'
+
+# common parameters for all rules
+common: 
+  study_dir: '../../../data/'
