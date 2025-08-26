@@ -40,7 +40,7 @@ Abstract: Mass deworming programs using effective anthelmintic drugs are essenti
 
 
 ## Code descriptions
-
+Please note that the codes in this repository were tested on Linux x86_64 system.
 ### Data Processing
 #### Dependencies
 * snakemake (v7.32.1) <br>
@@ -48,7 +48,7 @@ Abstract: Mass deworming programs using effective anthelmintic drugs are essenti
 
 #### Instructions
 _Please note that running the processing pipeline is optional since the final phyloseq objects necessary for the analysis are provided in this repository._
-1. Install dependencies.
+1. Install dependencies (~10 min).
 2. The raw data is publicly available at the European Nucleotide Archive (ENA) under accession number [PRJEB93790](https://www.ebi.ac.uk/ena/browser/view/PRJEB93790). Please download the fastq.gz files to the `data/reads/raw` directory and follow the proposed directory structure: `sample_name/sample_name_R*.fastq.qz`. The metadata file should be saved as a `data/metadata.tsv` file (a tab-separated format). 
 3. Download Silva database version 132 (https://zenodo.org/records/1172783) to the `data/database` directory.
 4. (optional) In case of custom paths to the raw files and database, please modify the corresponding parameters in the `code/processing/config.yaml` file.
@@ -92,7 +92,7 @@ __Snakemodule Steps__
 ---
 ### Analysis
 #### Dependencies
-1. Create and install a new conda environment
+1. Create and install a new conda environment (~30 min)
 ```
 conda create -n anthelminthic_treatment
 conda env update -n anthelminthic_treatment --file code/analysis/conda_env.R.yaml
